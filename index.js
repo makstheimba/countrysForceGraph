@@ -20,15 +20,11 @@ function dragended(d, simulation) {
 
 const startApp = () => {
   const url = 'https://raw.githubusercontent.com/DealPete/forceDirected/master/countries.json';
-  const width = 1300;
-  const height = 600;
-
+  const svg = d3.select('.chart').attr('viewBox', '0 0 1300 600');
   const simulation = d3.forceSimulation()
     .force('link', d3.forceLink())
     .force('charge', d3.forceManyBody())
-    .force('center', d3.forceCenter(width / 2, height / 2));
-
-  const svg = d3.select('.chart').attr('viewBox', `0 0 ${width} ${height}`);
+    .force('center', d3.forceCenter(400, 400)); // change to width / 2 and height / 2
 
   d3.json(url, (error, countrys) => {
     const link = svg.append('g')
@@ -36,8 +32,7 @@ const startApp = () => {
       .selectAll('line')
       .data(countrys.links)
       .enter()
-      .append('line')
-      .attr('stroke-width', d => Math.sqrt(d.value));
+      .append('line');
 
     const node = svg.append('g')
       .attr('class', 'nodes')
@@ -50,9 +45,6 @@ const startApp = () => {
         .on('start', d => dragstarted(d, simulation))
         .on('drag', dragged))
       .on('end', d => dragended(d, simulation));
-
-    node.append('title')
-      .text(d => d.id);
 
     simulation
       .nodes(countrys.nodes)
