@@ -7,6 +7,8 @@
     "func-names": ["error", "never"],
     "react/prefer-stateless-function": 0,
     "linebreak-style": "off",
-    "object-curly-newline": 0
+    "object-curly-newline": 0,
+    "max-len": ["error", 110],
+    "no-param-reassign": "off"
   }
 }

@@ -1,68 +1,50 @@
 const d3 = require('d3');
 require('d3-selection-multi');
 
-function dragstarted(d, simulation) {
-  if (!d3.event.active) simulation.alphaTarget(0.3).restart();
-  d.fx = d.x;
-  d.fy = d.y;
-}
-
-function dragged(d) {
-  d.fx = d3.event.x;
-  d.fy = d3.event.y;
-}
-
-function dragended(d, simulation) {
-  if (!d3.event.active) simulation.alphaTarget(0);
-  d.fx = null;
-  d.fy = null;
-}
-
-const startApp = () => {
+window.onload = () => {
   const url = 'https://raw.githubusercontent.com/DealPete/forceDirected/master/countries.json';
-  const svg = d3.select('.chart').attr('viewBox', '0 0 1300 600');
-  const simulation = d3.forceSimulation()
-    .force('link', d3.forceLink())
-    .force('charge', d3.forceManyBody())
-    .force('center', d3.forceCenter(400, 400)); // change to width / 2 and height / 2
+  const [width, height] = [1000, 400];
+  const svg = d3.select('.chart').attr('viewBox', `0 0 ${width} ${height}`);
 
   d3.json(url, (error, countrys) => {
+    const simulation = d3.forceSimulation();
     const link = svg.append('g')
       .attr('class', 'links')
       .selectAll('line')
       .data(countrys.links)
       .enter()
       .append('line');
-
     const node = svg.append('g')
       .attr('class', 'nodes')
       .selectAll('circle')
       .data(countrys.nodes)
       .enter()
-      .append('circle')
-      .attr('r', 5)
+      .append('image')
+      .attrs(({ code }) => ({ width: 12, height: 9, 'xlink:href': `flags/4x3/${code}.svg` }))
       .call(d3.drag()
-        .on('start', d => dragstarted(d, simulation))
-        .on('drag', dragged))
-      .on('end', d => dragended(d, simulation));
+        .on('start', (dragNode) => {
+          if (!d3.event.active) simulation.alphaTarget(0.3).restart();
+          dragNode.fx = dragNode.x;
+          dragNode.fy = dragNode.y;
+        })
+        .on('drag', (dragNode) => {
+          dragNode.fx = d3.event.x;
+          dragNode.fy = d3.event.y;
+        })
+        .on('end', (dragNode) => {
+          if (!d3.event.active) simulation.alphaTarget(0);
+          dragNode.fx = null;
+          dragNode.fy = null;
+        }));
 
     simulation
       .nodes(countrys.nodes)
+      .force('link', d3.forceLink(countrys.links))
+      .force('charge', d3.forceManyBody().strength(-2).distanceMax(300))
+      .force('center', d3.forceCenter(width / 2, height / 2))
       .on('tick', () => {
-        link
-          .attr('x1', d => d.source.x)
-          .attr('y1', d => d.source.y)
-          .attr('x2', d => d.target.x)
-          .attr('y2', d => d.target.y);
-
-        node
-          .attr('cx', d => d.x)
-          .attr('cy', d => d.y);
+        link.attrs(({ source: { x: x1, y: y1 }, target: { x: x2, y: y2 } }) => ({ x1, x2, y1, y2 }));
+        node.attrs(({ x, y }) => ({ x, y }));
       });
-
-    simulation.force('link')
-      .links(countrys.links);
   });
 };
-
-window.onload = startApp;
