@@ -3,7 +3,7 @@ require('d3-selection-multi');
 
 window.onload = () => {
   const url = 'https://raw.githubusercontent.com/DealPete/forceDirected/master/countries.json';
-  const [width, height] = [1280, 720];
+  const [width, height] = [1400, 720];
   const svg = d3.select('.chart').attr('viewBox', `0 0 ${width} ${height}`);
 
   d3.json(url, (error, countrys) => {
@@ -17,9 +17,8 @@ window.onload = () => {
       .data(countrys.nodes)
       .enter()
       .append('g')
-      .attr('transform', 'translate(-8, -6)')
-      .append('image')
-      .attrs(({ code }) => ({ width: 16, height: 12, 'xlink:href': `flags/4x3/${code}.svg` }))
+      .attr('transform', 'translate(-10, -7.5)')
+      .append('g')
       .call(d3.drag()
         .on('start', (dragNode) => {
           if (!d3.event.active) simulation.alphaTarget(0.3).restart();
@@ -36,6 +35,8 @@ window.onload = () => {
           dragNode.fy = null;
         }));
 
+    node.append('image')
+      .attrs(({ country }) => ({ width: 20, height: 15, 'xlink:href': `flags/ico/${country}.ico` }));
     node.append('title').text(({ country }) => country);
     simulation
       .nodes(countrys.nodes)
@@ -46,7 +47,7 @@ window.onload = () => {
       .force('alignY', d3.forceY(height / 2).strength(0.01))
       .on('tick', () => {
         link.attrs(({ source: { x: x1, y: y1 }, target: { x: x2, y: y2 } }) => ({ x1, x2, y1, y2 }));
-        node.attrs(({ x, y }) => ({ x, y }));
+        node.attr('transform', ({ x, y }) => `translate(${x}, ${y})`);
       });
   });
 };
