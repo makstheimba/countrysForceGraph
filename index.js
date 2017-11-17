@@ -36,7 +36,7 @@ window.onload = () => {
         }));
 
     node.append('image')
-      .attrs(({ country }) => ({ width: 20, height: 15, 'xlink:href': `flags/ico/${country}.ico` }));
+      .attrs(({ code }) => ({ width: 16, height: 12, 'xlink:href': `flags/${code}.png` }));
     node.append('title').text(({ country }) => country);
     simulation
       .nodes(countrys.nodes)
